@@ -1,6 +1,11 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
+import warnings
+import pandas as pd
+
+# Suppress FutureWarning messages
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 import requests
 pages = {
     "Analise de dados" : [
