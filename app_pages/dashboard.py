@@ -12,6 +12,10 @@ def last10matches(df_time_home, df_time_away):
     df_time_away.loc[:, 'Resultado'] = df_time_away.apply(lambda row: 'D' if row['FTHG'] > row['FTAG'] else ('V' if row['FTHG'] < row['FTAG'] else 'E'), axis=1)
     df_time_home.loc[:, 'Ambos Marcam'] = df_time_home.apply(lambda row: 'S' if row['FTHG'] > 0 and row['FTAG'] > 0 else 'N', axis=1)
     df_time_away.loc[:, 'Ambos Marcam'] = df_time_away.apply(lambda row: 'S' if row['FTHG'] > 0 and row['FTAG'] > 0 else 'N', axis=1)
+    df_time_home.loc[:, f'Over 1.5'] = df_time_home.apply(lambda row: 'S' if (row['FTHG']) > 1.5 else 'N', axis=1)
+    df_time_away.loc[:, f'Over 1.5'] = df_time_away.apply(lambda row: 'S' if (row['FTAG']) > 1.5 else 'N', axis=1)
+    df_time_home.loc[:, f'Over 2.5'] = df_time_home.apply(lambda row: 'S' if (row['FTHG']) > 2.5 else 'N', axis=1)
+    df_time_away.loc[:, f'Over 2.5'] = df_time_away.apply(lambda row: 'S' if (row['FTAG']) > 2.5 else 'N', axis=1)
     df_time_home.loc[:, 'Over 1.5 (Ambos)'] = df_time_home.apply(lambda row: 'S' if (row['FTHG'] + row['FTAG']) > 1.5 else 'N', axis=1)
     df_time_away.loc[:, 'Over 1.5 (Ambos)'] = df_time_away.apply(lambda row: 'S' if (row['FTHG'] + row['FTAG']) > 1.5 else 'N', axis=1)
     df_time_home.loc[:, 'Over 2.5 (Ambos)'] = df_time_home.apply(lambda row: 'S' if (row['FTHG'] + row['FTAG']) > 2.5 else 'N', axis=1)
@@ -23,10 +27,18 @@ def show_last10matches(df, time, dividir):
     quantidade_resultados = df['Resultado'].head(10).value_counts()
     lista_estatistica_ambos_marcam = df['Ambos Marcam'].head(10).tolist()
     quantidade_ambos_marcam = df['Ambos Marcam'].head(10).value_counts()
-    lista_estatistica_over_1_5 = df['Over 1.5 (Ambos)'].head(10).tolist()
-    quantidade_over_1_5 = df['Over 1.5 (Ambos)'].head(10).value_counts()
-    lista_estatistica_over_2_5 = df['Over 2.5 (Ambos)'].head(10).tolist()
-    quantidade_over_2_5 = df['Over 2.5 (Ambos)'].head(10).value_counts()
+    lista_estatistica_over_1_5 = df[f'Over 1.5'].head(10).tolist()
+    quantidade_over_1_5 = df[f'Over 1.5'].head(10).value_counts()
+    quantidade_over_1_5['S'] = 0 if 'S' not in quantidade_over_1_5 else quantidade_over_1_5['S']
+    lista_estatistica_over_2_5 = df[f'Over 2.5'].head(10).tolist()
+    quantidade_over_2_5 = df[f'Over 2.5'].head(10).value_counts()
+    quantidade_over_2_5['S'] = 0 if 'S' not in quantidade_over_2_5 else quantidade_over_2_5['S']
+    lista_estatistica_over_1_5_ambos = df['Over 1.5 (Ambos)'].head(10).tolist()
+    quantidade_over_1_5_ambos = df['Over 1.5 (Ambos)'].head(10).value_counts()
+    quantidade_over_1_5_ambos['S'] = 0 if 'S' not in quantidade_over_1_5_ambos else quantidade_over_1_5_ambos['S']
+    lista_estatistica_over_2_5_ambos = df['Over 2.5 (Ambos)'].head(10).tolist()
+    quantidade_over_2_5_ambos = df['Over 2.5 (Ambos)'].head(10).value_counts()
+    quantidade_over_2_5_ambos['S'] = 0 if 'S' not in quantidade_over_2_5_ambos else quantidade_over_2_5_ambos['S']
     df = df.iloc[:, 2:9].head(10).reset_index(drop=True)
     df.index += 1
     if dividir:
@@ -38,13 +50,17 @@ def show_last10matches(df, time, dividir):
             else:
                 col1.write(f"<img src='{row['LogoHome']}' style='width: 20px; height: 20px;'> :red[{row['HomeTeam']}] {row['FTHG']} x {row['FTAG']} :blue[{row['AwayTeam']}] <img src='{row['LogoAway']}' style='width: 20px; height: 20px;'>", unsafe_allow_html=True)
         col2.write(f"Resultado - {(quantidade_resultados[0]/10)*100}%")
-        status_partida(col2, lista_estatistica_resultados)
+        status_partida(col2, lista_estatistica_resultados, df)
         col2.write(f"Ambos Marcam - {(quantidade_ambos_marcam[0]/10)*100}%")
-        status_partida(col2, lista_estatistica_ambos_marcam)
-        col2.write(f"Mais de 1.5 gols (Ambos Times) - {(quantidade_over_1_5[0]/10)*100}%")
-        status_partida(col2, lista_estatistica_over_1_5)
-        col2.write(f"Mais de 2.5 gols (Ambos Times) - {(quantidade_over_2_5[1]/10)*100}%")
-        status_partida(col2, lista_estatistica_over_2_5)
+        status_partida(col2, lista_estatistica_ambos_marcam, df)
+        col2.write(f"Mais de 1.5 gols {time} - {(quantidade_over_1_5[0]/10)*100}%")
+        status_partida(col2, lista_estatistica_over_1_5, df)
+        col2.write(f"Mais de 2.5 gols {time} - {(quantidade_over_2_5[1]/10)*100}%")
+        status_partida(col2, lista_estatistica_over_2_5, df)
+        col2.write(f"Mais de 1.5 gols (Na Partida) - {(quantidade_over_1_5_ambos[0]/10)*100}%")
+        status_partida(col2, lista_estatistica_over_1_5_ambos, df)
+        col2.write(f"Mais de 2.5 gols (Na Partida) - {(quantidade_over_2_5_ambos[1]/10)*100}%")
+        status_partida(col2, lista_estatistica_over_2_5_ambos, df)
     else:
         st.write("Mandante x Visitante")
         for index, row in df.iterrows():
@@ -53,13 +69,17 @@ def show_last10matches(df, time, dividir):
             else:
                 st.write(f"<img src='{row['LogoHome']}' style='width: 20px; height: 20px;'> :red[{row['HomeTeam']}] {row['FTHG']} x {row['FTAG']} :blue[{row['AwayTeam']}] <img src='{row['LogoAway']}' style='width: 20px; height: 20px;'>", unsafe_allow_html=True)
         st.write(f"Resultado - {(quantidade_resultados[0]/10)*100}%")
-        status_partida(st, lista_estatistica_resultados)
+        status_partida(st, lista_estatistica_resultados, df)
         st.write(f"Ambos Marcam - {(quantidade_ambos_marcam[0]/10)*100}%")
-        status_partida(st, lista_estatistica_ambos_marcam)
-        st.write(f"Mais de 1.5 gols (Ambos Times) - {(quantidade_over_1_5[0]/10)*100}%")
-        status_partida(st, lista_estatistica_over_1_5)
-        st.write(f"Mais de 2.5 gols (Ambos Times) - {(quantidade_over_2_5[1]/10)*100}%")
-        status_partida(st, lista_estatistica_over_2_5)
+        status_partida(st, lista_estatistica_ambos_marcam, df)
+        st.write(f"Mais de 1.5 gols {time} - {(quantidade_over_1_5[1]/10)*100}%")
+        status_partida(st, lista_estatistica_over_1_5, df)
+        st.write(f"Mais de 2.5 gols {time} - {(quantidade_over_2_5[1]/10)*100}%")
+        status_partida(st, lista_estatistica_over_2_5, df)
+        st.write(f"Mais de 1.5 gols (Na Partida) - {(quantidade_over_1_5_ambos[1]/10)*100}%")
+        status_partida(st, lista_estatistica_over_1_5_ambos, df)
+        st.write(f"Mais de 2.5 gols (Na Partida) - {(quantidade_over_2_5_ambos[1]/10)*100}%")
+        status_partida(st, lista_estatistica_over_2_5_ambos, df)
 
 def dashboard_gols(df):
     try:
@@ -80,20 +100,22 @@ def dashboard_gols(df):
     except Exception as e:
         st.error(f"Deu erro: {e}")
 
-def status_partida(localizacao, array_jogos_resultado):
+def status_partida(localizacao, array_jogos_resultado, array_jogos):
     # Definindo os quadrados coloridos com letras
+    array_jogos = array_jogos[['HomeTeam', 'FTHG', 'FTAG', 'AwayTeam']]
+    array_jogos = array_jogos.reset_index(drop=True)
     elementos = []
-    for resultado in array_jogos_resultado:
+    for index, resultado in enumerate(array_jogos_resultado):
         if resultado == 'V':
-            elementos.append('<div style="font-size: 1rem; user-select: none; border-radius:5px; background-color: green; color: white; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; margin: 0 5px;">V</div>')
+            elementos.append(f'<div style="font-size: 1rem; user-select: none; border-radius:5px; background-color: green; color: white; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; margin: 0 5px;" title="{array_jogos["HomeTeam"][index]} {array_jogos["FTHG"][index]} x {array_jogos["FTAG"][index]} {array_jogos["AwayTeam"][index]}">V</div>')
         elif resultado == 'D':
-            elementos.append('<div style="font-size: 1rem; user-select: none; border-radius:5px; background-color: red; color: white; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; margin: 0 5px;">D</div>')
+            elementos.append(f'<div style="font-size: 1rem; user-select: none; border-radius:5px; background-color: red; color: white; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; margin: 0 5px;" title="{array_jogos["HomeTeam"][index]} {array_jogos["FTHG"][index]} x {array_jogos["FTAG"][index]} {array_jogos["AwayTeam"][index]}">D</div>')
         elif resultado == 'E':
-            elementos.append('<div style="font-size: 1rem; user-select: none; border-radius:5px; background-color: yellow; color: black; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; margin: 0 5px;">E</div>')
+            elementos.append(f'<div style="font-size: 1rem; user-select: none; border-radius:5px; background-color: yellow; color: black; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; margin: 0 5px;" title="{array_jogos["HomeTeam"][index]} {array_jogos["FTHG"][index]} x {array_jogos["FTAG"][index]} {array_jogos["AwayTeam"][index]}">E</div>')
         elif resultado == 'S':
-            elementos.append('<div style="font-size: 1rem; user-select: none; border-radius:5px; background-color: green; color: white; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; margin: 0 5px;">S</div>')
+            elementos.append(f'<div style="font-size: 1rem; user-select: none; border-radius:5px; background-color: green; color: white; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; margin: 0 5px;" title="{array_jogos["HomeTeam"][index]} {array_jogos["FTHG"][index]} x {array_jogos["FTAG"][index]} {array_jogos["AwayTeam"][index]}">S</div>')
         elif resultado == 'N':
-            elementos.append('<div style="font-size: 1rem; user-select: none; border-radius:5px; background-color: red; color: white; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; margin: 0 5px;">N</div>')
+            elementos.append(f'<div style="font-size: 1rem; user-select: none; border-radius:5px; background-color: red; color: white; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; margin: 0 5px;" title="{array_jogos["HomeTeam"][index]} {array_jogos["FTHG"][index]} x {array_jogos["FTAG"][index]} {array_jogos["AwayTeam"][index]}">N</div>')
 
     status_html = f"""
     <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 5px;">
