@@ -6,7 +6,7 @@ import pandas as pd
 warnings.simplefilter(action='ignore', category=FutureWarning)
 import numpy as np
 import requests
-
+st.set_page_config(page_title="Dashboard", page_icon="📈", layout="wide")
 def last10matches(df_time_home, df_time_away):
     df_time_home.loc[:, 'Resultado'] = df_time_home.apply(lambda row: 'V' if row['FTHG'] > row['FTAG'] else ('D' if row['FTHG'] < row['FTAG'] else 'E'), axis=1)
     df_time_away.loc[:, 'Resultado'] = df_time_away.apply(lambda row: 'D' if row['FTHG'] > row['FTAG'] else ('V' if row['FTHG'] < row['FTAG'] else 'E'), axis=1)
@@ -25,20 +25,35 @@ def last10matches(df_time_home, df_time_away):
 def show_last10matches(df, time, dividir):
     lista_estatistica_resultados = df['Resultado'].head(10).tolist()
     quantidade_resultados = df['Resultado'].head(10).value_counts()
+    quantidade_resultados['V'] = 0 if 'V' not in quantidade_resultados else quantidade_resultados['V']
+    quantidade_resultados['D'] = 0 if 'D' not in quantidade_resultados else quantidade_resultados['D']
+    quantidade_resultados['E'] = 0 if 'E' not in quantidade_resultados else quantidade_resultados['E']
+    quantidade_resultados = quantidade_resultados.sort_index()
     lista_estatistica_ambos_marcam = df['Ambos Marcam'].head(10).tolist()
     quantidade_ambos_marcam = df['Ambos Marcam'].head(10).value_counts()
+    quantidade_ambos_marcam['S'] = 0 if 'S' not in quantidade_ambos_marcam else quantidade_ambos_marcam['S']
+    quantidade_ambos_marcam['N'] = 0 if 'N' not in quantidade_ambos_marcam else quantidade_ambos_marcam['N']
+    quantidade_ambos_marcam = quantidade_ambos_marcam.sort_index()
     lista_estatistica_over_1_5 = df[f'Over 1.5'].head(10).tolist()
     quantidade_over_1_5 = df[f'Over 1.5'].head(10).value_counts()
     quantidade_over_1_5['S'] = 0 if 'S' not in quantidade_over_1_5 else quantidade_over_1_5['S']
+    quantidade_over_1_5['N'] = 0 if 'N' not in quantidade_over_1_5 else quantidade_over_1_5['N']
+    quantidade_over_1_5 = quantidade_over_1_5.sort_index()
     lista_estatistica_over_2_5 = df[f'Over 2.5'].head(10).tolist()
     quantidade_over_2_5 = df[f'Over 2.5'].head(10).value_counts()
     quantidade_over_2_5['S'] = 0 if 'S' not in quantidade_over_2_5 else quantidade_over_2_5['S']
+    quantidade_over_2_5['N'] = 0 if 'N' not in quantidade_over_2_5 else quantidade_over_2_5['N']
+    quantidade_over_2_5 = quantidade_over_2_5.sort_index()
     lista_estatistica_over_1_5_ambos = df['Over 1.5 (Ambos)'].head(10).tolist()
     quantidade_over_1_5_ambos = df['Over 1.5 (Ambos)'].head(10).value_counts()
     quantidade_over_1_5_ambos['S'] = 0 if 'S' not in quantidade_over_1_5_ambos else quantidade_over_1_5_ambos['S']
+    quantidade_over_1_5_ambos['N'] = 0 if 'N' not in quantidade_over_1_5_ambos else quantidade_over_1_5_ambos['N']
+    quantidade_over_1_5_ambos = quantidade_over_1_5_ambos.sort_index()
     lista_estatistica_over_2_5_ambos = df['Over 2.5 (Ambos)'].head(10).tolist()
     quantidade_over_2_5_ambos = df['Over 2.5 (Ambos)'].head(10).value_counts()
     quantidade_over_2_5_ambos['S'] = 0 if 'S' not in quantidade_over_2_5_ambos else quantidade_over_2_5_ambos['S']
+    quantidade_over_2_5_ambos['N'] = 0 if 'N' not in quantidade_over_2_5_ambos else quantidade_over_2_5_ambos['N']
+    quantidade_over_2_5_ambos = quantidade_over_2_5_ambos.sort_index()
     df = df.iloc[:, 2:9].head(10).reset_index(drop=True)
     df.index += 1
     if dividir:
@@ -49,15 +64,15 @@ def show_last10matches(df, time, dividir):
                 col1.write(f"<img src='{row['LogoHome']}' style='width: 20px; height: 20px;'> :blue[{row['HomeTeam']}] {row['FTHG']} x {row['FTAG']} :red[{row['AwayTeam']}] <img src='{row['LogoAway']}' style='width: 20px; height: 20px;'>", unsafe_allow_html=True)
             else:
                 col1.write(f"<img src='{row['LogoHome']}' style='width: 20px; height: 20px;'> :red[{row['HomeTeam']}] {row['FTHG']} x {row['FTAG']} :blue[{row['AwayTeam']}] <img src='{row['LogoAway']}' style='width: 20px; height: 20px;'>", unsafe_allow_html=True)
-        col2.write(f"Resultado - {(quantidade_resultados[0]/10)*100}%")
+        col2.write(f"Resultado - {(quantidade_resultados[2]/10)*100}%")
         status_partida(col2, lista_estatistica_resultados, df)
-        col2.write(f"Ambos Marcam - {(quantidade_ambos_marcam[0]/10)*100}%")
+        col2.write(f"Ambos Marcam - {(quantidade_ambos_marcam[1]/10)*100}%")
         status_partida(col2, lista_estatistica_ambos_marcam, df)
-        col2.write(f"Mais de 1.5 gols {time} - {(quantidade_over_1_5[0]/10)*100}%")
+        col2.write(f"Mais de 1.5 gols {time} - {(quantidade_over_1_5[1]/10)*100}%")
         status_partida(col2, lista_estatistica_over_1_5, df)
         col2.write(f"Mais de 2.5 gols {time} - {(quantidade_over_2_5[1]/10)*100}%")
         status_partida(col2, lista_estatistica_over_2_5, df)
-        col2.write(f"Mais de 1.5 gols (Na Partida) - {(quantidade_over_1_5_ambos[0]/10)*100}%")
+        col2.write(f"Mais de 1.5 gols (Na Partida) - {(quantidade_over_1_5_ambos[1]/10)*100}%")
         status_partida(col2, lista_estatistica_over_1_5_ambos, df)
         col2.write(f"Mais de 2.5 gols (Na Partida) - {(quantidade_over_2_5_ambos[1]/10)*100}%")
         status_partida(col2, lista_estatistica_over_2_5_ambos, df)
@@ -68,9 +83,9 @@ def show_last10matches(df, time, dividir):
                 st.write(f"<img src='{row['LogoHome']}' style='width: 20px; height: 20px;'> :blue[{row['HomeTeam']}] {row['FTHG']} x {row['FTAG']} :red[{row['AwayTeam']}] <img src='{row['LogoAway']}' style='width: 20px; height: 20px;'>", unsafe_allow_html=True)
             else:
                 st.write(f"<img src='{row['LogoHome']}' style='width: 20px; height: 20px;'> :red[{row['HomeTeam']}] {row['FTHG']} x {row['FTAG']} :blue[{row['AwayTeam']}] <img src='{row['LogoAway']}' style='width: 20px; height: 20px;'>", unsafe_allow_html=True)
-        st.write(f"Resultado - {(quantidade_resultados[0]/10)*100}%")
+        st.write(f"Resultado - {(quantidade_resultados[2]/10)*100}%")
         status_partida(st, lista_estatistica_resultados, df)
-        st.write(f"Ambos Marcam - {(quantidade_ambos_marcam[0]/10)*100}%")
+        st.write(f"Ambos Marcam - {(quantidade_ambos_marcam[1]/10)*100}%")
         status_partida(st, lista_estatistica_ambos_marcam, df)
         st.write(f"Mais de 1.5 gols {time} - {(quantidade_over_1_5[1]/10)*100}%")
         status_partida(st, lista_estatistica_over_1_5, df)
@@ -85,18 +100,25 @@ def dashboard_gols(df):
     try:
         df['FTHG'] = df['FTHG'].astype(int)
         df['FTAG'] = df['FTAG'].astype(int)
+        df['GAHT'] = df['GAHT'].astype(int)
+        df['GAAT'] = df['GAAT'].astype(int)
         gols_times_casa = df.groupby('HomeTeam')['FTHG'].sum()
         gols_times_visitante = df.groupby('AwayTeam')['FTAG'].sum()
         total_gols = gols_times_casa + gols_times_visitante
-        gols_times = pd.concat([gols_times_casa, gols_times_visitante, total_gols], axis=1)
-        gols_times.columns = ['Gols Casa', 'Gols Visitante', 'Total Gols']
+        finalizacoes_times_casa = df.groupby('HomeTeam')['GAHT'].sum()
+        finalizacoes_times_visitante = df.groupby('AwayTeam')['GAAT'].sum()
+        finalizacoes_times = finalizacoes_times_casa + finalizacoes_times_visitante
+        gols_times = pd.concat([gols_times_casa, gols_times_visitante, total_gols, finalizacoes_times_casa, finalizacoes_times_visitante, finalizacoes_times], axis=1)
+        gols_times.columns = ['Gols Casa', 'Gols Visitante', 'Total Gols', 'Total Finalizações Casa', 'Total Finalizações Visitante', 'Total Finalizações']
         gols_times.index.name = 'Times'
         colunas = st.multiselect(
             "Quais colunas deseja mostrar no gráfico?",
             [x for x in gols_times.columns],
             [gols_times.columns[0], gols_times.columns[1], gols_times.columns[2]])
+        #A
         df_to_show = gols_times[colunas]
         st.bar_chart(df_to_show)
+        st.dataframe(df_to_show)
     except Exception as e:
         st.error(f"Deu erro: {e}")
 
@@ -178,11 +200,11 @@ def dashboard_next_rounds(json, df):
         show_last10matches(df_estatistica2, away_team, False)
 
 def tab_pane():
-    datasets_disponiveis = requests.get('http://127.0.0.1:3001/listar_datasets').json()
+    datasets_disponiveis = requests.get('http://127.168.0.1:3001/listar_datasets').json()
     torneios = [f'{torneio['country']} - {torneio['tournament']} - {torneio['season']} - {torneio['time']}' for torneio in datasets_disponiveis]
     selecao_torneio = st.selectbox("Selecione o torneio desejado", torneios)
     torneio_selecionado = next(torneio['id'] for torneio in datasets_disponiveis if f"{torneio['country']} - {torneio['tournament']} - {torneio['season']} - {torneio['time']}" == selecao_torneio)
-    json_torneio = requests.get(f'http://127.0.0.1:3001/listar_dados/{torneio_selecionado}').json()
+    json_torneio = requests.get(f'http://127.168.0.1:3001/listar_dados/{torneio_selecionado}').json()
     df = pd.DataFrame(json_torneio)
     tab1, tab2, tab3 = st.tabs(["Gols Totais", "Estatistica por Time", 'Próximas Partidas'])
     with tab1:
@@ -192,7 +214,7 @@ def tab_pane():
     with tab3:
         # try:
             dividir_torneio_nome = selecao_torneio.split(' - ')
-            json_next_rounds = requests.get(f'http://127.0.0.1:3001/next_rounds/{dividir_torneio_nome[0]}/{dividir_torneio_nome[1]}/{dividir_torneio_nome[2]}').json()
+            json_next_rounds = requests.get(f'http://127.168.0.1:3001/next_rounds/{dividir_torneio_nome[0]}/{dividir_torneio_nome[1]}/{dividir_torneio_nome[2]}').json()
             dashboard_next_rounds(json_next_rounds, df)
         # except:
         #     st.write("Erro ao carregar os dados dos próximos jogos")

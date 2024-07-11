@@ -7,13 +7,13 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 import numpy as np
 import requests
 
-st.set_page_config(page_title="Dataframe", page_icon="📈")
+st.set_page_config(page_title="Dataframe", page_icon="📈", layout="wide")
 try:
-    datasets_disponiveis = requests.get('http://127.0.0.1:3001/listar_datasets').json()
+    datasets_disponiveis = requests.get('http://127.168.0.1:3001/listar_datasets').json()
     torneios = [f'{torneio['country']} - {torneio['tournament']} - {torneio['time']}' for torneio in datasets_disponiveis]
     selecao_torneio = st.selectbox("Selecione o torneio desejado", torneios)
     torneio_selecionado = next(torneio['id'] for torneio in datasets_disponiveis if f"{torneio['country']} - {torneio['tournament']} - {torneio['time']}" == selecao_torneio)
-    json_torneio = requests.get(f'http://127.0.0.1:3001/listar_dados/{torneio_selecionado}').json()
+    json_torneio = requests.get(f'http://127.168.0.1:3001/listar_dados/{torneio_selecionado}').json()
     df = pd.DataFrame(json_torneio)
     colunas = st.multiselect(
         "Quais colunas deseja mostrar no dataframe?",
